@@ -35,6 +35,7 @@ const productSchema=new mongoose.Schema({
     name:String,
     stock:Number,
     price:Number,
+    categoryName:String,
     imageUrl:String
 });
 const Product=mongoose.model("Product",productSchema);
@@ -77,7 +78,7 @@ app.post("/auth/register",async(req,res)=>{
             _id:uuidv4(),
             name:name,
             email:email,
-            passowrd:password
+            password:password
         });
 
         await user.save();
@@ -91,8 +92,9 @@ app.post("/auth/register",async(req,res)=>{
     }
 });
 //register Islemi
+
  //Login Metodu
- app.post("auth/login",async(req,res)=>{
+ app.post("/auth/login",async(req,res)=>{
     try {
         const {email,password}=req.body;
         const users=await User.find({email:email,password:password})
@@ -100,10 +102,10 @@ app.post("/auth/register",async(req,res)=>{
             res.status(500).json({message:"Mail adresi ya da sifre yanlis !"});
         }else{
             const payload={
-                user:user[0]
+                user:users[0]
             }
             const token=jwt.sign(payload,secretKey,options);
-            res.json({user:user[0],token:token})
+            res.json({user:users[0],token:token})
         }
     } catch (error) {
 
@@ -111,7 +113,48 @@ app.post("/auth/register",async(req,res)=>{
  })
  //Login Metodu
 
+ //Product Listesi
+app.get("/products",async(req,res)=>{
+    try {
+        const products=await Product.find({}).sort({name:1});
+        res.json(products);
+    } catch (error) {
+        res.status(500).json({message:error.message});
+    }
+})
+ //Product Listesi
 
+ //Dosya kayit islemi
+    const storage=multer.diskStorage({
+        destination:function(req, file, cb){
+            cb(null, "uploads/")
+        },
+        filename:function(req,file,cb){
+            cb(null, Date.now() + "-" +file.originalname)
+        }
+    });
+    const upload=multer({storage:storage});
+ //Dosya kayit islemi
+
+//Add Product Islemi
+app.post("/products/add",upload.single("image"),async(req,res)=>{
+    try {
+        const {name, categoryName, stock, price}=req.body;
+        const product=new Product({
+            _id:uuidv4(),
+            name:name,
+            stock:stock,
+            price:price,
+            categoryName:categoryName,
+            imageUrl:req.file.path
+        });
+      await  product.save();
+      res.json({message:"Urun kaydi basariyla tamamlandi!"});
+    } catch (error) {
+        res.status(500).json({message:error.message})
+    }
+})
+//Add Product Islemi
 const port=5000;
 app.listen(5000,()=>{
     console.log("Uygulama http://localhost:"+port+" uzerinden ayakta!");

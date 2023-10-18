@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Link, Outlet, useNavigate } from "react-router-dom";
 
 
@@ -6,6 +7,12 @@ function LayoutComponent() {
     const logout=()=>{
         navigate("/login");
     }
+
+    useEffect(()=>{
+        if(!localStorage.getItem("token")){
+            navigate("/login");
+        }
+    });
 
     return (
         <>

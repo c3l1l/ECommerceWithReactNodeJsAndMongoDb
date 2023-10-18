@@ -1,13 +1,25 @@
-import { Link } from "react-router-dom";
+import { Link,useNavigate } from "react-router-dom";
 import { useState } from "react";
+import axios from "axios";
 
 function LoginComponent(){
 
+    const navigate=useNavigate();
     const [email,setEmail]=useState("");
     const [password,setPassword]=useState("");
-    const login=(e)=>{
+    const login=async (e)=>{
         e.preventDefault();
-        console.log(email,password);
+        try {
+            let model={email:email,password:password};
+            console.log(`Model : ${model.email} ${model.password}`);
+let response=await axios.post("http://localhost:5000/auth/login",model);
+localStorage.setItem("token",response.data.token);
+localStorage.setItem("user",JSON.stringify(response.data.user));
+navigate("/");
+console.log("After navigate");
+        } catch (error) {
+            console.log(error);
+        }
     }
     return (
         <>
@@ -25,7 +37,7 @@ function LoginComponent(){
 
                                 </div>
                                 <div className="form-group mt-2">
-                                    <label htmlFor="password">Password</label>
+                                    <label htmlFor="password">Sifre</label>
                                     <input value={password} onChange={(e)=>{setPassword(e.target.value)}} type="password" id="password" name="password" className="form-control" />
                                 </div>
                                 <div className="form-group mt-2">

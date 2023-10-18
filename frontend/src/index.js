@@ -10,3 +10,5 @@ root.render(
 
 
 reportWebVitals();
+
+//rm -rf .git

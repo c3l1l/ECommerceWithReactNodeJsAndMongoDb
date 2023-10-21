@@ -9,7 +9,15 @@ function HomeComponent(){
     useEffect(()=>{
         getAll();
     },[]);
-
+    const addBasket=async (productId)=>{
+        let user=JSON.parse(localStorage.getItem("user"));
+        let model={
+            productId:productId,userId:user._id
+        }
+        var response=await axios.post("http://localhost:5000/baskets/add",model);
+        alert(response.data.message);
+        getAll();
+    }
 
     return (
         <>
@@ -26,7 +34,12 @@ function HomeComponent(){
                                 <img style={{width:"200px", height:"180px", margin:"auto", display:"block"}} src={"http://localhost:5000/"+product.imageUrl} />
                                 <h4 style={{border:"1px solid #ccc", padding:"10px"}} className=" text-center mt-1">Adet:{product.stock}</h4>
                                 <h4 style={{border:"1px solid #ccc", padding:"10px"}} className=" text-danger text-center mt-1">Price:{product.price}</h4>
-                                <button className="btn btn-outline-success w-100">Sepete Ekle</button>
+                                {
+                                    product.stock > 0 ?
+                                <button className="btn btn-outline-success w-100" onClick={()=>{addBasket(product._id)}}>Sepete Ekle</button>
+                                :
+                                <button className="btn btn-danger w-100" >Urun Stokta Yok !</button>
+                                }
                                 </div>
                             </div>
                         </div>

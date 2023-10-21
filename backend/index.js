@@ -49,9 +49,8 @@ const Product=mongoose.model("Product",productSchema);
 const basketSchema=new mongoose.Schema({
     _id:String,
     productId:String,
-    userId:String,
-    count:Number,
-    price:Number
+    userId:String
+
 });
 const Basket=mongoose.model("Basket",basketSchema);
 //Basket Collection
@@ -180,8 +179,14 @@ app.post("/baskets/add", async(req,res)=>{
         let basket=new Basket({
             _id:uuidv4(),
             userId:userId,
-            productId:product
-        })
+            productId:productId
+        });
+        await basket.save();
+        let product=await Product.findById(productId);
+        product.stock=product.stock - 1;
+        await Product.findByIdAndUpdate(productId,product);
+
+        res.json({message:"Urun sepete basariyla eklendi"});
     } catch (error) {
         res.status(500).json({message:error.message});
     }

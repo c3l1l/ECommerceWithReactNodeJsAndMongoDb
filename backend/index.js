@@ -5,10 +5,13 @@ const {v4:uuidv4} =require("uuid");
 const multer=require("multer");
 const cors=require("cors");
 const jwt=require("jsonwebtoken");
+const path=require("path");
+
 
 app.use(cors());
 
 app.use(express.json());
+app.use("/uploads",express.static(path.join(__dirname,"uploads")));
 
 
 
@@ -24,6 +27,7 @@ const userSchema=new mongoose.Schema({
     _id:String,
     name:String,
     email:String,
+    isAdmin:Boolean,
     password:String
 });
 const User=mongoose.model("User",userSchema);
@@ -78,7 +82,8 @@ app.post("/auth/register",async(req,res)=>{
             _id:uuidv4(),
             name:name,
             email:email,
-            password:password
+            password:password,
+            isAdmin:false
         });
 
         await user.save();
@@ -155,6 +160,33 @@ app.post("/products/add",upload.single("image"),async(req,res)=>{
     }
 })
 //Add Product Islemi
+
+//Remove Product Islemi
+app.post("/products/remove",async(req,res)=>{
+    try {
+        const {_id}=req.body;
+        await Product.findByIdAndRemove(_id);
+        res.json({message:"Silme islemi basariyla gerceklesti!"});
+    } catch (error) {
+        res.status(500).json({message:error.message});
+    }
+})
+//Remove Product Islemi
+
+//Sepete Urun Ekleme Islemi
+app.post("/baskets/add", async(req,res)=>{
+    try {
+        const {productId,userId}=req.body;
+        let basket=new Basket({
+            _id:uuidv4(),
+            userId:userId,
+            productId:product
+        })
+    } catch (error) {
+        res.status(500).json({message:error.message});
+    }
+})
+//Sepete Urun Ekleme Islemi
 const port=5000;
 app.listen(5000,()=>{
     console.log("Uygulama http://localhost:"+port+" uzerinden ayakta!");

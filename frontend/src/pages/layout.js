@@ -4,6 +4,7 @@ import { Link, Outlet, useNavigate } from "react-router-dom";
 
 function LayoutComponent() {
     const navigate=useNavigate();
+    let isAdmin=false;
     const logout=()=>{
         navigate("/login");
     }
@@ -14,6 +15,11 @@ function LayoutComponent() {
         }
     });
 
+    const checkIsAdmin=()=>{
+        let user= JSON.parse(localStorage.getItem("user"));
+        isAdmin=user.isAdmin;
+    }
+    checkIsAdmin();
     return (
         <>
             <nav className="navbar navbar-expand-lg bg-body-tertiary">
@@ -27,9 +33,12 @@ function LayoutComponent() {
                             <li className="nav-item mx-2">
                                 <Link to="/" >Ana Sayfa</Link>
                             </li>
-                            <li className="nav-item">
-                                <Link to="/products  mx-2" >Urunler</Link>
+                            {
+                                isAdmin &&
+                                <li className="nav-item   mx-2">
+                                <Link to="/products" >Urunler</Link>
                             </li>
+                            }
                             <li className="nav-item  mx-2">
                                 <Link to="/orders" >Siparislerim</Link>
                             </li>

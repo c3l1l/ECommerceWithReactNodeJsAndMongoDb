@@ -25,7 +25,7 @@ function HomeComponent(){
             <div className="row">
                 {
                     products.map((product,index)=>(
-                        <div key={index} className="col-md-3">
+                        <div key={index} className="col-md-3 mt-2">
                             <div className="card">
                                 <div className="card-header">
                                     <h3>{product.name}</h3>

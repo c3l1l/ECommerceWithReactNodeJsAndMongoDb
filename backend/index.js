@@ -59,7 +59,7 @@ const orderSchema = new mongoose.Schema({
     _id: String,
     productId: String,
     userId: String,
-  
+
 });
 
 const Order = mongoose.model("Order", orderSchema);
@@ -216,15 +216,15 @@ app.post("/baskets/getAll", async (req, res) => {
 })
 //Sepetteki Urunler
 //Sepetteki Urunu silme
-app.post("/baskets/remove",async(req,res)=>{
+app.post("/baskets/remove", async (req, res) => {
     try {
-        const {_id}=req.body;
-        const basket=await Basket.findById(_id);
-        const product=await Product.findById(basket.productId);
+        const { _id } = req.body;
+        const basket = await Basket.findById(_id);
+        const product = await Product.findById(basket.productId);
         product.stock += 1;
         await Product.findByIdAndUpdate(product._id, product);
         await Basket.findByIdAndRemove(_id);
-        res.json({message:+"Silme islemi basarili"});
+        res.json({ message: +"Silme islemi basarili" });
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -232,25 +232,51 @@ app.post("/baskets/remove",async(req,res)=>{
 //Sepetteki Urunu silme
 
 //Siparis Olusturma
-app.post("/orders/add",async (req,res)=>{
+app.post("/orders/add", async (req, res) => {
     try {
-        const {userId}=req.body;
-        const baskets = await Basket.find({userId:userId});
-        for(const basket of baskets){
-            let order=new Order({
-                _id:uuidv4(),
-                productId:basket.productId,
-                userId:userId
+        const { userId } = req.body;
+        const baskets = await Basket.find({ userId: userId });
+        for (const basket of baskets) {
+            let order = new Order({
+                _id: uuidv4(),
+                productId: basket.productId,
+                userId: userId
             })
             order.save();
-         await Basket.findOneAndRemove(basket._id);
+            await Basket.findOneAndRemove(basket._id);
         }
 
     } catch (error) {
-        res.status(500).json({message:error.message});
+        res.status(500).json({ message: error.message });
     }
 })
 //Siparis Olusturma
+//Siparis Listesi
+app.post("/orders", async (req, res) => {
+    try {
+        const { userId } = req.body;
+        const orders = await Order.aggregate([
+            {
+                $match: { userId: userId },
+
+            },
+            {
+                $lookup:
+                {
+                    from: "products",
+                    localField: "productId",
+                    foreignField: "_id",
+                    as: "products"
+                }
+
+            }
+        ]);
+        res.json(orders);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+})
+//Siparis Listesi
 
 const port = 5000;
 app.listen(5000, () => {
